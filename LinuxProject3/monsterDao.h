@@ -1,14 +1,7 @@
 #pragma once
 #include "sqlTem.h"
 #include <vector>
-#include "baseFightUnit.h"
-
-class Monster : public BaseFightUnit
-{
-public:
-	long monsterid;
-	string monstername;
-};
+#include "monster.h"
 
 class MonsterDao
 {

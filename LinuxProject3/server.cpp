@@ -3,20 +3,16 @@
 #include "JsonFactory.h"
 #include <cstdlib>
 #include <unistd.h>
+#include "myThreadPool.h"
+#include "sessionTask.h"
+#include "getRandomNum.h"
 
 #define PORT 8000
-
-void *newThread(void *arg) {
-	static RqeuestReceiver *rqeuestReceiver = RqeuestReceiver::getInstance();
-	
-	rqeuestReceiver->receiveRequest(*(int *)arg);
-	pthread_exit(NULL);
-}
-
 /*
 /tmp/VisualGDB/d/Code/C/project/LinuxProject3
 g++ cJSON.c server.cpp -I/usr/include/mysql -L/usr/include/mysql -lmysqlclient -lpthread
  */
+
 int main() {
 	struct sockaddr_in servaddr;
 	servaddr.sin_family = AF_INET;
@@ -32,14 +28,14 @@ int main() {
 	
 	int reuse = 1;
 	setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-	
+
 	if (bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0)
 	{
 		printf("bind error\n");
 		return 1;
 	}
 	
-	if (listen(sockfd, 10) < 0)
+	if (listen(sockfd, 100) < 0)
 	{
 		printf("listen error\n");
 		return 1;
@@ -48,18 +44,19 @@ int main() {
 	int connfd;
 	struct sockaddr_in client;
 	socklen_t len = sizeof(client);
+	MyThreadPool *myThreadPool = MyThreadPool::getInstance();
+	
+	struct sigaction sa;
+	sa.sa_handler = SIG_IGN;
+	sigaction(SIGPIPE, &sa, 0);
+	printf("ready\n");
 	
 	while (1) {
-		pthread_t thread;
 		connfd = accept(sockfd, (struct sockaddr *)&client, &len);
-		int err1 = pthread_create(&thread, NULL, newThread, &connfd);
-		
-		if (!err1)
-		{
-			pthread_detach(thread);	
-		}
+		MyTask *task = new SessionTask(connfd);
+		myThreadPool->addTask(task);
 	}
-
 
 	return 0;
 }
+

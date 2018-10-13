@@ -6,7 +6,7 @@
 #include "JsonFactory.h"
 #include "equipmentDao.h"
 #include "mapDao.h"
-#include "fightAction.h"
+#include "fightManage.h"
 #include "userAction.h"
 #include "websocketSessionManage.h"
 #include "noticeOnlineUserAction.h"
@@ -52,7 +52,7 @@ private:
 			response(session.getConnfd(), getLoginResultJson("success").c_str());
 			response(connfd, getUserInfoJson(user).c_str());
 			response(connfd, getEquipmentListJson(*session.getUserEquipList()).c_str());
-			response(connfd, getMapListJson(mapDao->getAllMap()).c_str());
+			response(connfd, getMapListJson(mapDao->getMapByMinRequiredLevel(user->level)).c_str());
 			noticeAction->noticeAllOnlineUser(connfd, username);
 			noticeAction->noticeNewOnlineUser(username, user->level);
 		}
@@ -104,9 +104,9 @@ private:
 		}
 	}
 
-	void createUserFight(string oppnentUsername, WebsocketSession &session, FightAction *fightAction)
+	void createUserFight(string oppnentUsername, WebsocketSession &session, FightManage *fightManage)
 	{
-		bool result = fightAction->createUserFight(oppnentUsername, &session);
+		bool result = fightManage->createUserFight(oppnentUsername, &session);
 		
 		if (!result)
 		{
@@ -116,9 +116,9 @@ private:
 		response(session.getConnfd(), getCreateUserFightResultJson(result, oppnentUsername).c_str());
 	}
 
-	void joinUserFight(int &creatorConnfd, WebsocketSession &session, FightAction *fightAction)
+	void joinUserFight(int &creatorConnfd, WebsocketSession &session, FightManage *fightManage)
 	{
-		if (!fightAction->joinUserFight(creatorConnfd, &session))
+		if (!fightManage->joinUserFight(creatorConnfd, &session))
 		{
 			session.setFight(false);
 		}
@@ -127,7 +127,7 @@ public:
 	void requestHanlder(string &method, cJSON *json, WebsocketSession &session)
 	{
 		int connfd = session.getConnfd(); 
-		static FightAction *fightAction = FightAction::getInstance();
+		static FightManage *fightManage = FightManage::getInstance();
 		bool fighting = session.isFighting();
 		
 		if (fighting)
@@ -139,7 +139,7 @@ public:
 			else if (method == "cancelUserFight")
 			{
 				string oppnentUsername(cJSON_GetObjectItem(json, "oppnentUsername")->valuestring);
-				fightAction->cancelUserFight(oppnentUsername, &session);
+				fightManage->cancelUserFight(oppnentUsername, &session);
 			}
 			else
 			{
@@ -150,9 +150,9 @@ public:
 		{
 			if (method == "beginMapFight")
 			{
-				long mapid = atol(cJSON_GetObjectItem(json, "mapid")->valuestring);
 				session.setFight(true);
-				fightAction->mapFight(mapid, session);
+				long mapid = atol(cJSON_GetObjectItem(json, "mapid")->valuestring);
+				fightManage->mapFight(mapid, session);
 				session.setFight(false);
 			}
 			else if (method == "wearEquip")
@@ -165,18 +165,18 @@ public:
 			{
 				session.setFight(true);
 				int creatorConnfd = atol(cJSON_GetObjectItem(json, "creatorConnfd")->valuestring);
-				joinUserFight(creatorConnfd, session, fightAction);
+				joinUserFight(creatorConnfd, session, fightManage);
 			}
 			else if (method == "refuseUserFight")
 			{
 				int creatorConnfd = atol(cJSON_GetObjectItem(json, "creatorConnfd")->valuestring);
-				fightAction->refuseUserFight(creatorConnfd, &session);
+				fightManage->refuseUserFight(creatorConnfd, &session);
 			}
 			else if (method == "createUserFight")
 			{
 				session.setFight(true);
 				string oppnentUsername(cJSON_GetObjectItem(json, "username")->valuestring);
-				createUserFight(oppnentUsername, session, fightAction);
+				createUserFight(oppnentUsername, session, fightManage);
 			}
 			else if (method == "login")
 			{

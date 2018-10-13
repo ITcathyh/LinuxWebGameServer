@@ -69,6 +69,11 @@ void response(int connfd, const char * message)
 		printf("data is empty!\n");  
 		return;  
 	}   
+	
+	if (!webSocketSessionManage->isSessionOpen(connfd))
+	{
+		return;
+	}
 
 	send(connfd, data, n, MSG_DONTWAIT);
 	//write(connfd, data, n);

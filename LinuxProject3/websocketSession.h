@@ -86,16 +86,23 @@ public:
 		sem_post(&setUserSem);
 	}
 	
-	void setUser(User user1)
+	void setUser(User &user1)
 	{
 		sem_wait(&setUserSem);
 		
-		if (user)
-		{
-			delete(user);
-		}
+		user->id = user1.id;
+		user->username = user1.username;
+		user->level = user1.level;
+		user->points = user1.points;
+		user->agility = user1.agility;
+		user->strength = user1.strength;
+		user->HP = user1.HP;
+		user->MP = user1.MP;
+		user->attachAgility = user1.attachAgility;
+		user->attachStrength = user1.attachStrength;
+		user->attachHP = user1.attachHP;
+		user->attachMP = user1.attachMP;
 		
-		user = new User(user1);
 		sem_post(&setUserSem);
 	}
 	

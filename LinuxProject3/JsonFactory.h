@@ -98,10 +98,11 @@ string getEquipmentListJson(const vector<Equipment> &v)
 	return jsonstr;
 }
 
-string getMapListJson(const vector<MyMap*> &v)
+string getMapListJson(const vector<MyMap*> &v, string method="mapList")
 {
 	cJSON *json = cJSON_CreateObject();
 	cJSON  *array = cJSON_CreateArray();
+	cJSON_AddStringToObject(json, "method", method.c_str());
 	
 	for (int i = 0, len = v.size(); i < len; ++i)
 	{
@@ -114,8 +115,6 @@ string getMapListJson(const vector<MyMap*> &v)
 		delete(myMap);
 		cJSON_AddItemToArray(array, tmp);
 	}
-	
-	cJSON_AddStringToObject(json, "method", "mapList");
 	
 	if (v.size())
 	{
@@ -147,18 +146,29 @@ string getMonsterJson(const Monster &monster)
 }
 
 string getFightDetailJson(const int &userhp, const int &userAssault, const bool &userMiss,
-	const int &opponentHP, const int &opponentAssault, const bool &opponentMiss)
+	const int &opponentHP, const int &opponentAssault, const bool &opponentMiss,
+	string userSkill = "普通攻击", string opponentSkill = "普通攻击")
 {
 	cJSON *json = cJSON_CreateObject();
-
+	
 	cJSON_AddStringToObject(json, "method", "fightDetail");
-	cJSON_AddNumberToObject(json, "userhp", userhp);
-	cJSON_AddNumberToObject(json, "userAssault", userAssault);
 	cJSON_AddBoolToObject(json, "userMiss", userMiss);
-	cJSON_AddNumberToObject(json, "opponentHP", opponentHP);
-	cJSON_AddNumberToObject(json, "opponentAssault", opponentAssault);
 	cJSON_AddBoolToObject(json, "opponentMiss", opponentMiss);
+	cJSON_AddNumberToObject(json, "userhp", userhp);
+	cJSON_AddNumberToObject(json, "opponentHP", opponentHP);
 
+	if (!userMiss)
+	{
+		cJSON_AddNumberToObject(json, "userAssault", userAssault);
+		cJSON_AddStringToObject(json, "userSkill", userSkill.c_str());
+	}
+	
+	if (!opponentMiss)
+	{
+		cJSON_AddNumberToObject(json, "opponentAssault", opponentAssault);
+		cJSON_AddStringToObject(json, "opponentSkill", opponentSkill.c_str());
+	}
+	
 	string jsonstr = cJSON_Print(json);
 	cJSON_Delete(json);
 	
@@ -322,7 +332,9 @@ string getNoticeAllOnlineUserJson(string selename)
 	
 	for (hash_map<int, WebsocketSession*>::iterator it = connfdSessionMap->begin(); it != connfdSessionMap->end();it++)
 	{	
-		if (webSocketSessionManage->isSessionOpen(it->first))
+		int connfd = it->first;
+		
+		if (webSocketSessionManage->isSessionOpen(connfd))
 		{
 			cJSON *tmp = cJSON_CreateObject();
 			User *user = it->second->getUser();

@@ -3,6 +3,9 @@
 #include "equipmentDao.h"
 #include <semaphore.h>
 #include "websocketSessionManage.h"
+#include "mapDao.h"
+#include "JsonFactory.h"
+#include "websocketSendAction.h"
 
 class UserAction
 {
@@ -41,38 +44,28 @@ public:
 		if (isUpdate(user->points))
 		{
 			int addLevel = computeAddLevel(user->points);
+			WebSocketSessionManage *manage = WebSocketSessionManage::getInstance();
+			int connfd = manage->getConnfdByUsername(user->username);
 			update(user, addLevel);
+			
+			if (connfd && manage->isSessionOpen(connfd))
+			{
+				MapDao* mapDao = MapDao::getInstance();
+				response(connfd, getMapListJson(mapDao->getMapByRequiredLevel(user->level), "newMapList").c_str());
+			}
 		}
 	}
 	
-	static bool isUserHaveEquip(long &equipid, string &username)
+	static bool isUserHaveEquip(long &equipid, long &userid)
 	{
 		if (equipid <= 0)
 		{
 			return true;
 		}
 		
-		static WebSocketSessionManage *manage = WebSocketSessionManage::getInstance();
-		WebsocketSession *session = manage->getSessionByUsername(username);
+		static EquipmentDao *dao = EquipmentDao::getInstance();
 		
-		if (manage->isSessionOpen(session))
-		{
-			vector<Equipment> *v = session->getUserEquipList();
-			
-			for (int i = 0, len = v->size(); i < len; ++i)
-			{
-				if ((*v)[i].equipmentid == equipid)
-				{
-					return true;
-				}
-			}
-		}
-		else
-		{
-			return false;
-		}
-		
-		return false;
+		return dao->isUserHaveEquip(equipid, userid);
 	}
 
 	static void wearEquip(sem_t *updateEquipSem, User *user, Equipment *newEquip, Equipment *oldEquip = NULL)

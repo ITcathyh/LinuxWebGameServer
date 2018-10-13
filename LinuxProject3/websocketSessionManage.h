@@ -3,6 +3,8 @@
 #include <ext/hash_map>
 #include <string>
 #include "websocketSession.h"
+#include <sys/stat.h>
+#include <fcntl.h> 
 using namespace std;
 using namespace __gnu_cxx;
 
@@ -22,13 +24,33 @@ private:
 	hash_map<string, int> userConnfdMap;
 	hash_map<int, WebsocketSession*> connfdSessionMap;
 	
+	bool checkFd(int &connfd) {  
+		struct stat _stat;  
+		
+		if (!fcntl(connfd, F_GETFL)) {  
+			if (!fstat(connfd, &_stat)) {  
+				if (_stat.st_nlink >= 1)
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}  
+		}  
+		
+		return false;  
+	}  
+	
 	WebSocketSessionManage()
 	{
 	}
 public:
-	bool isSessionOpen(const int &connfd)
+	bool isSessionOpen(int &connfd)
 	{
-		return connfdSessionMap.count(connfd) == 1 && !connfdSessionMap[connfd]->isClose();
+		return connfdSessionMap.count(connfd) == 1 &&
+			!connfdSessionMap[connfd]->isClose();
 	}
 	
 	bool isSessionOpen(WebsocketSession* session)
@@ -38,7 +60,17 @@ public:
 			return false;
 		}
 		
-		return connfdSessionMap.count(session->getConnfd()) == 1;
+		int connfd = session->getConnfd();
+		
+		return connfdSessionMap.count(connfd) == 1;
+	}
+	
+	bool isSessionValid(int &connfd)
+	{
+		WebsocketSession* session = connfdSessionMap[connfd];
+		
+		return session && !session->isClose() &&
+			session->isLogin() && checkFd(connfd);
 	}
 	
 	void addSession(const int connfd, WebsocketSession* session)

@@ -8,6 +8,8 @@
 #include "websocketSendAction.h"
 #include "userAction.h"
 #include "fightParam.h"
+#include "fightAction.h"
+#include "getRandomNum.h"
 
 class Fight : public FightParam
 {
@@ -16,7 +18,6 @@ private:
 	Monster *monster;
 	int connfd;
 	int userAgility;
-	int userStrength;
 	int userMP;
 	int userHP;
 	
@@ -44,7 +45,7 @@ private:
 			UserAction::checkUserLevel(&user);
 			
 			if (userDao->updateUser(&user) && 
-				!UserAction::isUserHaveEquip(equip.equipmentid, user.username))
+				!UserAction::isUserHaveEquip(equip.equipmentid, user.id))
 			{
 				dao->addUserEquip(equip.equipmentid, user.id);
 				getEquip = true;
@@ -76,7 +77,6 @@ public:
 		user = *user1;
 		monster = monster1;
 		userAgility = ESCAPE_RATE_PER_AGILITY * 1000 * (user.agility + user.attachAgility);
-		userStrength = ATN_PER_STRENGTH * (user.strength + user.attachStrength);
 		userHP = user.HP;
 		userMP = user.MP;
 		monster->agility *= ESCAPE_RATE_PER_AGILITY * 1000;
@@ -88,19 +88,26 @@ public:
 	{
 		bool end = false;
 		bool userWin = false;
-		struct timeb timeSeed;
-		ftime(&timeSeed);
-		srand(timeSeed.time * 1000 + timeSeed.millitm);
+		//struct timeb timeSeed;
+	//	ftime(&timeSeed);
+		//srand(timeSeed.time * 1000 + timeSeed.millitm);
 		int range = 1001;
+		int userAssault = 0;
+		int userStrength = user.strength + user.attachStrength;
+		string skill;
+		static FightAction *fightAction = FightAction::getInstance();
+		static GetRandomNum *randomNum = GetRandomNum::getInstance();
 		
 		while (!end)
 		{
-			int randomRate = rand() % range;
+			//int randomRate = rand() % range;
+			int randomRate = randomNum->getRandomnum();
 			bool userMiss = false, monsterMiss = false;
 		
 			if (randomRate > monster->agility)
 			{
-				monster->HP -= userStrength;
+				userAssault = fightAction->getAttackMode(skill, user.level, user.strength);
+				monster->HP -= userAssault;
 		
 				if (monster->HP <= 0)
 				{
@@ -130,11 +137,11 @@ public:
 			}
 		
 			string jsonstr = getFightDetailJson(userHP,
-				userStrength,
+				userAssault,
 				userMiss,
 				monster->HP,
 				monster->strength,
-				monsterMiss);
+				monsterMiss,skill);
 			
 			response(connfd, jsonstr.c_str());
 			delay();
@@ -169,6 +176,7 @@ public:
 		for (; i < len; ++i)
 		{
 			Fight fight(user, monsterList[i], connfd);
+			
 			if (!fight.fighting(monsterList[i]->level))
 			{
 				userWin = false;

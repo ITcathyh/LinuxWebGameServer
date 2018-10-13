@@ -16,15 +16,14 @@ char *http_res_tmpl = "HTTP/1.1 200 OK\r\n"
 "Content-Length: %d\r\n"
 "Connection: close\r\n"
 "Content-Type: %s\r\n\r\n";
-	
-void shakeHand(int &connfd, char *buffer);  
-char * fetchSecKey(char * buf);  
-char * computeAcceptKey(char * buf);  
-char * analyData(char * buf, int bufLen); 
 
 class RqeuestReceiver
 {
 private:
+	RqeuestReceiver()
+	{
+	}
+	
 	char * fetchSecKey(char * buf)  
 	{  
 		char *key;  
@@ -109,11 +108,6 @@ private:
 		char *serverKey = computeAcceptKey(buffer);
 		char responseHeader[RESPONSE_HEADER_LEN_MAX];  
 
-		if (!connfd)  
-		{  
-			return;  
-		}  
-
 		if (!serverKey)  
 		{  
 			return;  
@@ -138,7 +132,6 @@ private:
 		unsigned short usLen = 0;  
 		int i = 0;   
 
-
 		if (bufLen < 2)   
 		{  
 			return NULL;  
@@ -157,6 +150,7 @@ private:
 		}  
 
 		payloadLen = buf[1] & 0x7F;  
+		
 		if (payloadLen == 126)  
 		{        
 			memcpy(masks, buf + 4, 4);        
@@ -195,20 +189,43 @@ private:
 		return payloadData;  
 	}  
 	
-	RqeuestReceiver()
+	void dealRequest(char *data, int &connfd, WebsocketSession &session)
 	{
+		cJSON *json = cJSON_Parse(data);
+		static RequestHanlder* requestHanlder = RequestHanlder::getInstance();
+			
+		if (!json)
+		{
+			return;
+		}
+			
+		string method(cJSON_GetObjectItem(json, "method")->valuestring);
+		
+		if (!session.isLogin() && method != "login")
+		{
+			response(connfd, getErrorJson("please login first").c_str());
+		}
+		else if (session.isLogin() && method == "login")
+		{
+			response(connfd, getErrorJson("already login").c_str());
+		}
+		else
+		{
+			requestHanlder->requestHanlder(method, json, session);
+		}
+		
+		cJSON_Delete(json);
 	}
 public:
 	void receiveRequest(int connfd)
 	{
-		fcntl(connfd, F_SETFL, fcntl(connfd, F_GETFL, 0) | O_NONBLOCK);
-		static RequestHanlder* requestHanlder = RequestHanlder::getInstance();
 		static WebSocketSessionManage *webSocketSessionManage = WebSocketSessionManage::getInstance();
 		char buffer[BUFF_SIZE];
 		int size = read(connfd, buffer, BUFF_SIZE - 1);
 		shakeHand(connfd, buffer);
 		WebsocketSession session(connfd);
 		webSocketSessionManage->addSession(connfd, &session);
+		fcntl(connfd, F_SETFL, fcntl(connfd, F_GETFL, 0) | O_NONBLOCK);
 
 		while (1)
 		{
@@ -218,6 +235,7 @@ public:
 		
 			if (size == 0)
 			{
+				webSocketSessionManage->removeSession(connfd);
 				printf("close\n");
 				break;
 			}
@@ -236,30 +254,8 @@ public:
 			}
 		
 			char *data = analyData(buffer, size);
-			printf("Receive data(%d, size%d) :%s\n", connfd, size, data);
-			cJSON *json = cJSON_Parse(data);
-			
-			if (!json)
-			{
-				continue;
-			}
-			
-			string method(cJSON_GetObjectItem(json, "method")->valuestring);
-		
-			if (!session.isLogin() && method != "login")
-			{
-				response(connfd, getErrorJson("please login first").c_str());
-			}
-			else if (session.isLogin() && method == "login")
-			{
-				response(connfd, getErrorJson("already login").c_str());
-			}
-			else
-			{
-				requestHanlder->requestHanlder(method, json, session);
-			}
-		
-			cJSON_Delete(json);
+		//	printf("Receive data(%d, size%d) :%s\n", connfd, size, data);
+			dealRequest(data, connfd, session);
 		}
 		
 		static NoticeOnlineUserAction* noticeOnlineUserAction = NoticeOnlineUserAction::getInstance();
@@ -269,7 +265,6 @@ public:
 			noticeOnlineUserAction->noticeNewOfflineUser(session.getUser()->username);
 		}
 	
-		webSocketSessionManage->removeSession(connfd);
 		close(connfd);
 	}
 	

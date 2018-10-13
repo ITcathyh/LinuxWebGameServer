@@ -10,6 +10,7 @@
 #include <semaphore.h>
 #include "websocketSessionManage.h"
 #include "fightParam.h"
+#include "fightAction.h"
 
 class UserFight : public FightParam
 {
@@ -47,6 +48,7 @@ private:
 			response(session1->getConnfd(), getFightResultJson(firstUserWin, XP1).c_str());
 			session1->setUser(user1);
 			session1->setFight(false);
+			response(session1->getConnfd(), getUserInfoJson(&user1).c_str());
 		}
 		
 		if (sessionManage->isSessionOpen(session2))
@@ -54,33 +56,38 @@ private:
 			response(session2->getConnfd(), getFightResultJson(!firstUserWin, XP2).c_str());
 			session2->setUser(user2);
 			session2->setFight(false);
+			response(session2->getConnfd(), getUserInfoJson(&user2).c_str());
 		}
 	}
 	
 	void fighting()
 	{
+		static FightAction *fightAction = FightAction::getInstance();
 		bool end = false;
 		bool firstWin = false;
-		struct timeb timeSeed;
-		ftime(&timeSeed);
-		srand(timeSeed.time * 1000 + timeSeed.millitm);
+	//	struct timeb timeSeed;
+		//ftime(&timeSeed);
+		//srand(timeSeed.time * 1000 + timeSeed.millitm);
 		int range = 1001;
-		int hp1, hp2;
-		hp1 = user1.HP + user1.attachHP;
-		hp2 = user2.HP + user2.attachHP;
+		int hp1 = user1.HP + user1.attachHP;
+		int hp2 = user2.HP + user2.attachHP;
 		int userAgility1 = ESCAPE_RATE_PER_AGILITY * 1000 * (user1.agility + user1.attachAgility);
-		int userStrength1 = ATN_PER_STRENGTH * (user1.strength + user1.attachStrength);
+		short userStrength1 = user1.strength + user1.attachStrength;
 		int userAgility2 = ESCAPE_RATE_PER_AGILITY * 1000 * (user2.agility + user2.attachAgility);
-		int userStrength2 = ATN_PER_STRENGTH * (user2.strength + user2.attachStrength);
+		short userStrength2 = user2.strength + user2.attachStrength;
+		int userAssault1, userAssault2;
+		string skill1, skill2;
+		static GetRandomNum *randomNum = GetRandomNum::getInstance();
 		
 		while (!end)
 		{
-			int randomRate = rand() % range;
+			int randomRate = randomNum->getRandomnum();
 			bool firstMiss = false, nextMiss = false;
 		
 			if (randomRate > userAgility2)
 			{
-				hp2 -= userStrength1;
+				userAssault1 = fightAction->getAttackMode(skill1, user1.level, userStrength1);
+				hp2 -= userAssault1;
 		
 				if (hp2 <= 0)
 				{
@@ -96,7 +103,9 @@ private:
 		
 			if (!end && randomRate > userAgility1)
 			{
-				hp1 -= userStrength2;
+				
+				userAssault2 = fightAction->getAttackMode(skill2, user2.level, userStrength2);
+				hp1 -= userAssault2;
 		
 				if (hp1 <= 0)
 				{
@@ -109,30 +118,40 @@ private:
 				nextMiss = true;
 			}
 		
-			noticeFightDetail(firstMiss, nextMiss, hp1, hp2);
-			usleep(5000);
+			noticeFightDetail(firstMiss, nextMiss, 
+				hp1, hp2,
+				userAssault1,userAssault2,
+				skill1,skill2);
+			delay();
 		}
 		
 		endFight(firstWin);
 	}
 	
-	void noticeFightDetail(const bool &firstMiss, const bool &nextMiss, int &hp1, int &hp2)
+	void noticeFightDetail(bool &firstMiss, bool &nextMiss,
+		int &hp1, int &hp2,
+		int &userAssault1, int &userAssault2,
+		string skill1, string skill2)
 	{
 		const int &connfd1 = session1->getConnfd();
 		const int &connfd2 = session2->getConnfd();
 		string jsonstr = getFightDetailJson(hp1,
-			user1.strength,
+			userAssault1,
 			firstMiss,
 			hp2,
-			user2.strength,
-			nextMiss);
+			userAssault2,
+			nextMiss,
+			skill1,
+			skill2);
 		response(connfd1, jsonstr.c_str());
 		jsonstr = getFightDetailJson(hp2,
-			user2.strength,
+			userAssault2,
 			nextMiss,
 			hp1,
-			user1.strength,
-			firstMiss);
+			userAssault1,
+			firstMiss,
+			skill2,
+			skill1);
 		response(connfd2, jsonstr.c_str());
 	}
 public:

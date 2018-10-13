@@ -1,14 +1,35 @@
-﻿  VisualGDB: Sending 6 updated source files to build machine...
-  VisualGDB: Run "make -f "VisualGDB/Debug/LinuxProject3.msbuild-mak" --no-print-directory" in directory "/tmp/VisualGDB/d/Code/C/project/LinuxProject3/LinuxProject3" on root@192.168.37.131 (SSH)
+﻿  VisualGDB: Sending 4 updated source files to build machine...
+  VisualGDB: Run "make -f "VisualGDB/Debug/LinuxProject3.msbuild-mak" --no-print-directory" in directory "/tmp/VisualGDB/d/Code/C/project/LinuxProject3/LinuxProject3" on root@192.168.37.132 (SSH)
   server.cpp
-  C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.131\0001\include\c++\6\ext\hash_map(60):
+  C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.132\0001\include\c++\6\ext\hash_map(60):
   websocketSessionManage.h(3):
   websocketSendAction.h(18):
   requestReceiver.h(2):
   server.cpp(1):
-C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.131\0001\include\c++\6\backward\backward_warning.h(32,2): warning :  #warning This file includes at least one deprecated or antiquated header which may be removed without further notice at a future date. Please use a non-deprecated interface with equivalent functionality instead. For a listing of replacement headers and interfaces, consult the file backward_warning.h. To disable this warning use -Wno-deprecated. [-Wcpp]
+C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.132\0001\include\c++\6\backward\backward_warning.h(32,2): warning :  #warning This file includes at least one deprecated or antiquated header which may be removed without further notice at a future date. Please use a non-deprecated interface with equivalent functionality instead. For a listing of replacement headers and interfaces, consult the file backward_warning.h. To disable this warning use -Wno-deprecated. [-Wcpp]
    #warning \
     ^~~~~~~
+  server.cpp(1):
+requestReceiver.h(8): warning :  "LINE_MAX" redefined
+   #define LINE_MAX 256 
+   
+  C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.132\0001\include\limits.h(147):
+  C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.132\0003\include-fixed\limits.h(168):
+  C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.132\0003\include-fixed\syslimits.h(7):
+  C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.132\0003\include-fixed\limits.h(34):
+  C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.132\0001\include\x86_64-linux-gnu\sys\param.h(26):
+  C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.132\0001\include\rpc\types.h(94):
+  C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.132\0001\include\rpc\rpc.h(38):
+  my.h(9):
+  getRandomNum.h(3):
+  mapFight.h(12):
+  fightManage.h(2):
+  requestHanlder.h(9):
+  requestReceiver.h(3):
+  server.cpp(1):
+  C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.132\0001\include\x86_64-linux-gnu\bits\posix2_lim.h(81): note :  this is the location of the previous definition
+   #define LINE_MAX  _POSIX2_LINE_MAX
+   
   userDao.h(2):
   websocketSession.h(3):
   websocketSessionManage.h(5):
@@ -16,7 +37,7 @@ C:\Users\黄宇航\AppData\Local\VisualGDB\RemoteSourceCache\192.168.37.131\0001
   requestReceiver.h(2):
   server.cpp(1):
   sqlTem.h: In function ‘int insert(char*)’:
-sqlTem.h(84,10): warning :  converting to non-pointer type ‘int’ from NULL [-Wconversion-null]
+sqlTem.h(79,10): warning :  converting to non-pointer type ‘int’ from NULL [-Wconversion-null]
      return NULL;
             ^~~~
   JsonFactory.h(6):
@@ -24,16 +45,26 @@ sqlTem.h(84,10): warning :  converting to non-pointer type ‘int’ from NULL [
   requestReceiver.h(3):
   server.cpp(1):
   mapDao.h: In member function ‘std::vector<MyMap*> MapDao::getAllMap()’:
-mapDao.h(64,44): warning :  ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+mapDao.h(60,44): warning :  ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
     MYSQL_RES *res = query("select * from map");
                                               ^
+  fightParam.h(3):
+  mapFight.h(10):
+  fightManage.h(2):
+  requestHanlder.h(9):
+  requestReceiver.h(3):
+  server.cpp(1):
+  skillDao.h: In member function ‘std::vector<Skill*> SkillDao::getAll()’:
+skillDao.h(40,14): warning :  ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+    char *sql = "select * from skill order by requiredLevel";
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   server.cpp(1):
   requestReceiver.h: At global scope:
 requestReceiver.h(18,1): warning :  ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
    "Content-Type: %s\r\n\r\n";
    ^~~~~~~~~~~~~~~~~~~~~~~~~~
   requestReceiver.h: In member function ‘char* RqeuestReceiver::fetchSecKey(char*)’:
-requestReceiver.h(32,16): warning :  ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
+requestReceiver.h(31,16): warning :  ISO C++ forbids converting a string constant to ‘char*’ [-Wwrite-strings]
      char *flag = "Sec-WebSocket-Key: ";  
                   ^~~~~~~~~~~~~~~~~~~~~
   Linking ../VisualGDB/Debug/LinuxProject3...

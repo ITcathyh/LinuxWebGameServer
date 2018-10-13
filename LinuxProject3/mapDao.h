@@ -1,14 +1,8 @@
 #pragma once
 #include "sqlTem.h"
 #include <vector>
+#include "myMap.h"
 
-class MyMap
-{
-public:
-	long mapid;
-	string mapname;
-	string detail;
-};
 
 class MapDao
 {
@@ -20,6 +14,8 @@ private:
 public:
 	MyMap *getMapById(long id);
 	vector<MyMap*> getAllMap();
+	vector<MyMap*> getMapByMinRequiredLevel(short level);
+	vector<MyMap*> getMapByRequiredLevel(short level);
 	static MapDao* getInstance()
 	{
 		static MapDao instance;
@@ -62,6 +58,50 @@ vector<MyMap*> MapDao::getAllMap()
 {
 	vector<MyMap*> v;
 	MYSQL_RES *res = query("select * from map");
+	
+	if (res == NULL)
+	{
+		return v;
+	}
+	
+	MYSQL_ROW sqlrow;	
+	
+	while ((sqlrow = mysql_fetch_row(res)))
+	{
+		v.push_back(mappingMap(sqlrow));
+	}
+	
+	return v;
+}
+
+vector<MyMap*> MapDao::getMapByMinRequiredLevel(short level)
+{
+	vector<MyMap*> v;
+	char sql[100];
+	sprintf(sql, "select * from map where requiredLevel<=%d", level);
+	MYSQL_RES *res = query(sql);
+	
+	if (res == NULL)
+	{
+		return v;
+	}
+	
+	MYSQL_ROW sqlrow;	
+	
+	while ((sqlrow = mysql_fetch_row(res)))
+	{
+		v.push_back(mappingMap(sqlrow));
+	}
+	
+	return v;
+}
+
+vector<MyMap*> MapDao::getMapByRequiredLevel(short level)
+{
+	vector<MyMap*> v;
+	char sql[100];
+	sprintf(sql, "select * from map where requiredLevel=%d", level);
+	MYSQL_RES *res = query(sql);
 	
 	if (res == NULL)
 	{

@@ -34,10 +34,7 @@ MYSQL * connectMysql()
 
 void connectMysql(MYSQL *conn)
 {
-	cout << "begin" << endl;
 	conn = mysql_init(NULL);  
-	
-	cout << conn << endl;
   
 	if (!conn)  
 	{  
@@ -46,15 +43,13 @@ void connectMysql(MYSQL *conn)
 	}  
 	
 	conn = mysql_real_connect(conn, "localhost", USERNAME, PASSWORD, DATABASE_NAME, 0, NULL, 0);
-	
-	cout << conn << endl;
-	cout << "end" << endl;
 }
 
 MYSQL_RES *query(char *sql)
 {
 	MYSQL_RES *res;  
 	MYSQL *conn = connectMysql();
+	mysql_query(conn, "set names utf8");
 	
 	if (!conn)  
 	{  
@@ -84,7 +79,10 @@ int insert(char *sql)
 		return NULL;
 	}  
 	
-	return mysql_query(conn, sql);
+	int res = mysql_query(conn, sql);
+	
+	mysql_close(conn);
+	return res;
 }
 
 string getLongStr(long num)

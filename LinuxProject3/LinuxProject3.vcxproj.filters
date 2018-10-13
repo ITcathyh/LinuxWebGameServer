@@ -35,14 +35,23 @@
     <Filter Include="Header files\action\fight">
       <UniqueIdentifier>{7b9d26a5-c205-4250-824e-19c11efb3ec5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header files\action\websocket">
-      <UniqueIdentifier>{b4cb1c05-b890-4c67-a960-970de143419c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header files\action\user">
       <UniqueIdentifier>{750dca36-0331-41a3-b2a6-b665efd6acb1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header files\action\notice">
       <UniqueIdentifier>{f3246d0d-e897-4306-9a81-8c8144a14a1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\manage">
+      <UniqueIdentifier>{98264790-de82-4223-a8bf-1bc610db6716}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\threadPool">
+      <UniqueIdentifier>{7e2f1aa9-355f-433f-abd3-7cf26a55d632}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\entity">
+      <UniqueIdentifier>{5e278423-9491-4125-8fd5-fc7ebff549d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header files\rpc">
+      <UniqueIdentifier>{a89dd5c1-3db8-4488-940c-edac90b09b19}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -93,12 +102,6 @@
     <ClInclude Include="sha1.h">
       <Filter>Header files\util</Filter>
     </ClInclude>
-    <ClInclude Include="baseFightUnit.h">
-      <Filter>Header files\dao</Filter>
-    </ClInclude>
-    <ClInclude Include="fightAction.h">
-      <Filter>Header files\action\fight</Filter>
-    </ClInclude>
     <ClInclude Include="mapFight.h">
       <Filter>Header files\action\fight</Filter>
     </ClInclude>
@@ -108,12 +111,6 @@
     <ClInclude Include="fightRoom.h">
       <Filter>Header files\action\fight</Filter>
     </ClInclude>
-    <ClInclude Include="websocketSendAction.h">
-      <Filter>Header files\action\websocket</Filter>
-    </ClInclude>
-    <ClInclude Include="websocketSessionManage.h">
-      <Filter>Header files\action\websocket</Filter>
-    </ClInclude>
     <ClInclude Include="userAction.h">
       <Filter>Header files\action\user</Filter>
     </ClInclude>
@@ -122,6 +119,57 @@
     </ClInclude>
     <ClInclude Include="fightParam.h">
       <Filter>Header files\action\fight</Filter>
+    </ClInclude>
+    <ClInclude Include="skillDao.h">
+      <Filter>Header files\dao</Filter>
+    </ClInclude>
+    <ClInclude Include="websocketSessionManage.h">
+      <Filter>Header files\manage</Filter>
+    </ClInclude>
+    <ClInclude Include="fightManage.h">
+      <Filter>Header files\manage</Filter>
+    </ClInclude>
+    <ClInclude Include="fightAction.h">
+      <Filter>Header files\action\fight</Filter>
+    </ClInclude>
+    <ClInclude Include="myTask.h">
+      <Filter>Header files\threadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="myThreadPool.h">
+      <Filter>Header files\threadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="sessionTask.h">
+      <Filter>Header files\threadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="userFightTask.h">
+      <Filter>Header files\threadPool</Filter>
+    </ClInclude>
+    <ClInclude Include="websocketSendAction.h">
+      <Filter>Header files\action\notice</Filter>
+    </ClInclude>
+    <ClInclude Include="baseFightUnit.h">
+      <Filter>Header files\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="equipment.h">
+      <Filter>Header files\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="myMap.h">
+      <Filter>Header files\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="monster.h">
+      <Filter>Header files\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="skill.h">
+      <Filter>Header files\entity</Filter>
+    </ClInclude>
+    <ClInclude Include="user.h">
+      <Filter>Header files</Filter>
+    </ClInclude>
+    <ClInclude Include="myRPC.h">
+      <Filter>Header files\rpc</Filter>
+    </ClInclude>
+    <ClInclude Include="getRandomNum.h">
+      <Filter>Header files\rpc</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
